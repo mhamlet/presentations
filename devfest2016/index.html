@@ -1,0 +1,227 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>reveal.js</title>
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/black.css">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section>
+					<span class="fragment fade-up">We have an idea for our next startup</span>
+				</section>
+
+				<section>
+					<ul>
+						<li class="fragment fade-up">
+							Google
+							<span class="fragment fade-left">Maps</span>
+						</li>
+						<li class="fragment fade-up">Uber</li>
+						<li class="fragment fade-up">Foursquare</li>
+						<li class="fragment fade-up">Yelp</li>
+						<li class="fragment fade-up">MongoDB</li>
+						<li class="fragment fade-up">...</li>
+					</ul>
+				</section>
+
+				<section class="fade">
+					<h2>Google's S2</h2>
+				</section>
+
+				<section>
+					<h3>Pros</h3>
+
+					<ul>
+						<li class="fragment fade-up">C++ library</li>
+						<li class="fragment fade-up">Fast</li>
+						<li class="fragment fade-up">Released more than 5 years ago</li>
+						<li class="fragment fade-up">Compact. <span class="fragment fade-up">Only a 64-bit integer</span></li>
+					</ul>
+				</section>
+
+				<section>
+					<h3>Cons</h3>
+
+					<ul>
+						<li class="fragment fade-up">Rich functionality... <span class="fragment fade-up">but poor documentation</span></li>
+						<li class="fragment fade-up">Small community</li>
+						<li class="fragment fade-up">Incomplete ports to other languages</li>
+						<li class="fragment fade-up">Hard to learn and start development</li>
+					</ul>
+				</section>
+
+				<section>
+					<h3>How it works?</h3>
+					<ul>
+						<li class="fragment fade-up" data-fragment-index="0">Quad-tree</li>
+						<li class="fragment fade-up" data-fragment-index="1">
+							Some math
+							<p class="fragment fade-up" data-fragment-index="2">(lat, lng) -> (x, y, z)</p>
+							<p class="fragment fade-up" data-fragment-index="3">(x, y, z) -> (face, <span class="fragment fade-up" data-fragment-index="4">i, j</span>)</p>
+							<p class="fragment fade-up" data-fragment-index="5">(face, i, j) -> S2CellId <span class="fragment fade-up" data-fragment-index="6">(64-bit integer)</span></p>
+						</li>
+					</ul>
+
+					<img src="img/sphere-projection.png" alt="" width="250" style="display: block; margin: 0 auto;"
+					 class="fragment fade-up" data-fragment-index="1">
+				</section>
+
+				<section>
+					<h3>Quad-tree</h3>
+					<img src="img/ij_11.png" alt="" width="500" class="fragment fade-up">
+				</section>
+
+				<section>
+					<h3>Hilbert Curve</h3>
+					<img src="img/hilbert_curve.gif" alt="" width="500" class="fragment fade-up">
+				</section>
+
+				<section>
+					<h3>Hilbert Curve</h3>
+					<img src="img/hilbert_curve_empty.png" alt="" width="500">
+				</section>
+
+				<section>
+					<h3>Hilbert Curve</h3>
+					<img src="img/hilbert_curve_full.png" alt="" width="500">
+				</section>
+
+				<section>
+					<h3>Quad-tree with Hilbert Curve</h3>
+					<img src="img/ij_22.png" alt="" width="500" class="fragment fade-up">
+				</section>
+
+				<section>
+					<h3>Cell representation</h3>
+					<img src="img/cells_representation.png" alt="" width="700" class="fragment fade-up">
+				</section>
+
+				<section>
+					<h3>Cell area</h3>
+					<br>
+					<table class="fragment fade-up">
+						<tr>
+							<th>Level</th>
+							<th>Min area</th>
+							<th>Max area</th>
+						</tr>
+						<tr>
+							<td>0</td>
+							<td>85 011 012 km<sup>2</sup></td>
+							<td>85 011 012 km<sup>2</sup></td>
+						</tr>
+						<tr>
+							<td>1</td>
+							<td>21,252,753 km<sup>2</sup></td>
+							<td>21,252,753 km<sup>2</sup></td>
+						</tr>
+						<tr>
+							<td>12</td>
+							<td>3.31 km<sup>2</sup></td>
+							<td>6.38 km<sup>2</sup></td>
+						</tr>
+						<tr class="fragment highlight-green">
+							<td>30</td>
+							<td>0.48 cm<sup>2</sup></td>
+							<td>0.93 cm<sup>2</sup></td>
+						</tr>
+					</table>
+
+					<br>
+
+					<span class="fragment fade-up">
+						That means<span class="fragment fade-up">,
+					that every 1 cm<sup>2</sup> on the earth have it's own ID
+						</span><span class="fragment fade-up">, and every ID is only a 64-bit integer</span>
+					</span>
+
+				</section>
+
+				<section>
+					<h3>How to get Cell ID?</h3>
+
+					<pre class="fragment fade-up"><code data-trim data-noescape class="python">
+>>> import s2
+>>> latlng = s2.S2LatLng.FromDegrees(-30.043800, -51.140220)
+>>> cell = s2.S2CellId.FromLatLng(latlng)
+>>> cell.level()
+30
+>>> cell.id()
+10743750136202470315
+    </code></pre>
+				</section>
+
+				<section>
+					<h3>How to get parent cell?</h3>
+
+					<pre class="fragment fade-up"><code data-trim data-noescape class="python">
+>>> parent = cell.parent()
+>>> print parent.level()
+29
+>>> parent.id()
+10743750136202470316
+>>> cell.contains(parent)
+False
+>>> parent.contains(cell)
+True
+    </code></pre>
+				</section>
+
+				<section>
+					<h3>How to create a covering?</h3>
+
+					<pre class="fragment fade-up"><code data-trim data-noescape class="python">
+>>> region_rect = S2LatLngRect(
+        S2LatLng.FromDegrees(-51.264871, -30.241701),
+        S2LatLng.FromDegrees(-51.04618, -30.000003))
+>>> coverer = S2RegionCoverer()
+>>> coverer.set_min_level(8)
+>>> coverer.set_max_level(15)
+>>> coverer.set_max_cells(500)
+>>> covering = coverer.GetCovering(region_rect)
+    </code></pre>
+				</section>
+
+				<section>
+					<h2>Thank you!</h2>
+				</section>
+			</div>
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+			// More info https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				history: true,
+
+				// More info https://github.com/hakimel/reveal.js#dependencies
+				dependencies: [
+					{ src: 'plugin/markdown/marked.js' },
+					{ src: 'plugin/markdown/markdown.js' },
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+				]
+			});
+		</script>
+	</body>
+</html>
